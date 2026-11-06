@@ -15,10 +15,15 @@ LIB:=$(SHA3_INCLUDE)
 MAIN_PRNG:=$(ROOT)/src/main_prng.cpp
 PRNG_SRC:=$(ROOT)/lib/fips202/prng.cpp
 
+DH_SRC:=$(SRC)/main_dh.cpp $(SRC)/dh.cpp $(SRC)/u512.cpp
+DH_HEADERS:=$(wildcard $(SRC)/*.h) $(wildcard $(ROOT)/lib/fips202/*.h)
+
 LIB_OBJS:=fips202.o
 
 BIN:=bin
 BUILD:=bin/build
+
+.PHONY: folders dh run-dh
 
 folders:
 	@echo -e "\n### Creating folders\n"
@@ -38,6 +43,14 @@ prng: | folders
 
 run-prng: prng
 	./$(BIN)/prng
+
+dh: $(BIN)/dh
+
+$(BIN)/dh: $(DH_SRC) $(DH_HEADERS) $(PRNG_SRC) $(SHA3_SRC) | folders
+	$(CPP) $(CPP_FLAGS) $(DH_SRC) $(PRNG_SRC) $(SHA3_SRC) -I $(SRC) $(LIB) -o $@
+
+run-dh: dh
+	./$(BIN)/dh
 
 clean:
 	rm -rf ./bin
