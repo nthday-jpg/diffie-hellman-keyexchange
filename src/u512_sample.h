@@ -15,16 +15,16 @@ struct uint512_t
 
     uint512_t(uint64_t value = 0) : digits{}
     {
-        for (size_t i = 0; i < 8; i++)
-        {
-            digits[i] = 0;
-        }
+        digits[0] = value;
     }
 };
 
 // Cộng/trừ lấy kết quả modulo 2^512 (bỏ carry/borrow cuối cùng).
 uint512_t operator+(const uint512_t &a, const uint512_t &b);
 uint512_t operator-(const uint512_t &a, const uint512_t &b);
+uint512_t operator*(const uint512_t &a, const uint512_t &b);
+uint512_t operator/(const uint512_t &a, const uint512_t &b);
+uint512_t operator%(const uint512_t &a, const uint512_t &b);
 bool operator==(const uint512_t &a, const uint512_t &b);
 bool operator<(const uint512_t &a, const uint512_t &b);
 bool operator>(const uint512_t &a, const uint512_t &b);
