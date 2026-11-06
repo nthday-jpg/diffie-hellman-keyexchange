@@ -13,8 +13,7 @@ struct uint512_t
     // Little-endian theo khối: digits[0] chứa 64 bit thấp nhất.
     uint64_t digits[8];
 
-    // Constructor mặc định khởi tạo mảng toàn số 0
-    uint512_t()
+    uint512_t(uint64_t value = 0) : digits{}
     {
         for (size_t i = 0; i < 8; i++)
         {
