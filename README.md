@@ -6,7 +6,24 @@ Bài tập môn Nhập môn mã hóa mật mã — Bộ môn Công nghệ Tri th
 
 Xây dựng chương trình sinh số nguyên tố an toàn và mô phỏng trao đổi khóa Diffie-Hellman, giúp Alice và Bob tính được cùng một bí mật mà không truyền trực tiếp khóa riêng.
 
-Các mục dưới đây là **yêu cầu cần thực hiện**, không phải xác nhận chức năng đã hoàn thành.
+Các mục dưới đây là yêu cầu của bài tập. Checklist tiến độ chỉ đánh dấu những phần đã cài đặt; các yêu cầu còn lại chưa được xem là hoàn thành.
+
+## Tiến độ hiện tại
+
+- [x] Kiểu `uint512_t` gồm 8 khối `uint64_t`, khối thấp nhất ở `digits[0]`.
+- [x] Khởi tạo từ `uint64_t`, sao chép/gán và các phép so sánh `==`, `<`, `>`, `<=`, `>=`.
+- [x] Các toán tử `+`, `-`, `*`, `/`, `%`; chia hoặc lấy dư cho 0 ném `std::domain_error`.
+- [x] Lũy thừa mô-đun bằng bình phương–nhân trong `src/dh.cpp`, dùng nhân mô-đun tránh mất dữ liệu trung gian.
+- [x] Xử lý số mũ 0, mô-đun 1 và từ chối mô-đun 0.
+- [x] Kiểm thử riêng các phép nhân/chia/lấy dư và lũy thừa mô-đun với C++14; đối chiếu lũy thừa với Python `pow()`, gồm toán hạng 512 bit.
+- [ ] Đưa các kiểm thử riêng vào repo để có thể chạy lại tự động.
+- [ ] Hỗ trợ thay đổi kích thước số lớn sang 1024/2048 bit.
+- [ ] Kiểm tra nguyên tố và sinh số nguyên tố an toàn.
+- [ ] Sinh khóa riêng trong miền yêu cầu.
+- [ ] Hoàn thiện và kiểm thử toàn bộ luồng trao đổi khóa Diffie-Hellman.
+- [ ] Hoàn thiện báo cáo và hướng dẫn chạy chương trình đầy đủ.
+
+**Lưu ý số học:** `+`, `-`, `*` trả kết quả modulo `2^512`, không giữ phần tràn. Khi tính lũy thừa mô-đun, chương trình dùng cộng/nhân đôi mô-đun riêng thay vì `(a * b) % mod` để tránh sai kết quả do mất phần cao của tích. Thuật toán hiện chưa có thời gian chạy cố định.
 
 ## 1. Chức năng cần triển khai
 
@@ -29,7 +46,7 @@ Các mục dưới đây là **yêu cầu cần thực hiện**, không phải x
 - Tự cài đặt logic sinh ứng viên và kiểm tra nguyên tố, ví dụ Miller–Rabin; **không gọi thư viện sinh hoặc kiểm tra số nguyên tố thay cho phần tự cài đặt**.
 - Nếu dùng kiểm tra xác suất, nêu số vòng kiểm tra và giới hạn xác suất sai trong báo cáo; không coi một lần kiểm tra là chứng minh nguyên tố tuyệt đối.
 
-### 1,4. Sinh khóa riêng — `generate_private_key(p)`
+### 1.4. Sinh khóa riêng — `generate_private_key(p)`
 
 - Sinh độc lập khóa riêng `a` cho Alice và `b` cho Bob trong khoảng **`[2, p - 2]`**.
 - Sử dụng nguồn ngẫu nhiên phù hợp cho mật mã; tránh seed cố định trong chế độ chạy thông thường và tránh thiên lệch khi đưa số ngẫu nhiên về khoảng yêu cầu.
