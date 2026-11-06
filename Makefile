@@ -26,7 +26,7 @@ BUILD:=bin/build
 .PHONY: folders dh run-dh
 
 folders:
-	@echo -e "\n### Creating folders\n"
+	@printf '\n### Creating folders\n\n'
 	mkdir -p $(BUILD) $(BIN)
 
 fips202.o: | folders
