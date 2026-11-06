@@ -3,7 +3,7 @@ ROOT:=.
 endif
 
 CPP:=g++
-CPP_FLAGS:=-O3 -Wall -Wextra -Wpedantic -Wvla -Wredundant-decls 
+CPP_FLAGS:=-std=c++14 -O3 -Wall -Wextra -Wpedantic -Wvla -Wredundant-decls 
 
 SHA3_SRC:=$(ROOT)/lib/fips202/fips202.c
 SHA3_INCLUDE:=-I $(ROOT)/lib/fips202
@@ -26,7 +26,7 @@ folders:
 
 fips202.o: | folders
 	@/bin/echo -e "\n### Compiling fips202"
-	$(CPP) $(CFLAGS) -c $(SHA3_SRC) $(SHA3_INCLUDE) -o $(BUILD)/$@
+	$(CPP) $(CPP_FLAGS) -c $(SHA3_SRC) $(SHA3_INCLUDE) -o $(BUILD)/$@
 
 %.o: $(SRC)/%.cpp | folders
 	@/bin/echo -e "\n### Compiling $@"
