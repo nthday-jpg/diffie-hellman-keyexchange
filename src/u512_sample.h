@@ -17,6 +17,8 @@ struct uint512_t
     {
         digits[0] = value;
     }
+
+    uint512_t &operator=(const uint512_t &other) = default;
 };
 
 // Cộng/trừ lấy kết quả modulo 2^512 (bỏ carry/borrow cuối cùng).
