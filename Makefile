@@ -23,7 +23,11 @@ LIB_OBJS:=fips202.o
 BIN:=bin
 BUILD:=bin/build
 
-.PHONY: folders dh run-dh
+.PHONY: folders dh run-dh test-dh
+
+test-dh: | folders
+	$(CPP) $(CPP_FLAGS) $(ROOT)/tests/test_dh_generation.cpp $(SRC)/dh.cpp $(SRC)/u512.cpp $(PRNG_SRC) $(SHA3_SRC) -I $(SRC) $(LIB) -o $(BIN)/test-dh
+	./$(BIN)/test-dh
 
 folders:
 	@printf '\n### Creating folders\n\n'

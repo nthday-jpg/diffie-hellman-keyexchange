@@ -18,8 +18,8 @@ Các mục dưới đây là yêu cầu của bài tập. Checklist tiến độ
 - [x] Kiểm thử riêng các phép nhân/chia/lấy dư và lũy thừa mô-đun với C++14; đối chiếu lũy thừa với Python `pow()`, gồm toán hạng 512 bit.
 - [ ] Đưa các kiểm thử riêng vào repo để có thể chạy lại tự động.
 - [ ] Hỗ trợ thay đổi kích thước số lớn sang 1024/2048 bit.
-- [ ] Kiểm tra nguyên tố và sinh số nguyên tố an toàn.
-- [ ] Sinh khóa riêng trong miền yêu cầu.
+- [x] Kiểm tra nguyên tố Miller–Rabin 64 vòng và sinh số nguyên tố an toàn (xác suất).
+- [x] Sinh khóa riêng trong miền yêu cầu bằng lấy mẫu loại bỏ.
 - [ ] Hoàn thiện và kiểm thử toàn bộ luồng trao đổi khóa Diffie-Hellman.
 - [ ] Hoàn thiện báo cáo và hướng dẫn chạy chương trình đầy đủ.
 
@@ -120,3 +120,31 @@ Khi hoàn thành chương trình, cần bổ sung hướng dẫn biên dịch/ch
 - [Kiểm tra Miller–Rabin](https://crypto.stanford.edu/pbc/notes/numbertheory/millerrabin.html)
 - [Minh họa Diffie-Hellman](https://www.geeksforgeeks.org/implementation-diffie-hellman-algorithm/)
 - [Thư viện chuẩn C++ — lưu ý phiên bản sử dụng](https://en.cppreference.com/w/cpp/standard_library)
+
+## Hai hàm sinh số trong src/dh.cpp
+
+generate_safe_prime(ctx, bitsize) sinh q lẻ có đúng itsize - 1 bit, đặt p = 2q + 1, lọc ước nguyên tố nhỏ rồi kiểm tra Miller–Rabin cho cả q và p. Mỗi số dùng 64 vòng với cơ sở lấy đều trong [2, n-2]. Với một hợp số cố định và các cơ sở ngẫu nhiên độc lập, xác suất vượt qua 64 vòng không quá 4^-64 = 2^-128; đây không phải chứng minh nguyên tố tuyệt đối hoặc giới hạn xác suất sai cho toàn bộ quá trình tìm kiếm lặp lại.
+
+Kiểu hiện tại hỗ trợ itsize từ 3 đến 512, mặc định 512 theo mức tối thiểu của đề. Kích thước nhỏ phục vụ kiểm thử; 1024/2048 bit cần mở rộng kiểu số. Hàm ném std::invalid_argument nếu kích thước ngoài miền hoặc ctx là null.
+
+generate_private_key(ctx, p) giả định p là số nguyên tố đã sinh, yêu cầu p >= 5 và ctx khác null. Hàm lấy mẫu đều trong [0, p-4] bằng rejection sampling, sau đó cộng 2 để được [2, p-2], không dùng phép dư gây thiên lệch. Hai lần gọi liên tiếp dùng trạng thái PRNG tiến lên; hai khóa vẫn có thể tình cờ bằng nhau.
+
+Caller phải khởi tạo PRNG trước khi gọi; không dùng seed cố định ngoài kiểm thử:
+
+`cpp
+uint8_t seed[32];
+randombytes(seed, sizeof(seed));
+prng_ctx ctx;
+prng_seed(&ctx, seed, sizeof(seed));
+const auto p = generate_safe_prime(&ctx);
+const auto a = generate_private_key(&ctx, p);
+const auto b = generate_private_key(&ctx, p);
+`
+
+Chạy bộ kiểm thử C++14 trên Linux có g++ và make: make test-dh. Bộ kiểm thử dùng số nhỏ để đối chiếu nguyên tố bằng chia thử độc lập, kiểm tra số bit, miền khóa (kể cả biên 512 bit), đầu vào lỗi và bí mật chung. Chưa xác minh chạy sinh safe prime 512 bit; phép nhân mô-đun cộng/nhân đôi hiện tại có thể khiến quá trình này chậm. Thư viện PRNG hiện dùng sys/random.h/getrandom, nên chưa biên dịch trực tiếp trên Windows.
+
+## Chạy mô phỏng Diffie–Hellman
+
+Trên Linux có g++ và make, chạy make run-dh. src/main_dh.cpp khởi tạo PRNG từ entropy hệ điều hành, sinh safe prime, chọn g sao cho g^2 mod p khác 1 và g^q mod p khác 1, sinh hai khóa riêng rồi tính và so sánh bí mật chung. Chương trình in p, g, A, B và hai bí mật chung ở hệ thập lục phân; không in khóa riêng a, b. Mã thoát là 0 nếu hai bí mật trùng nhau, 1 nếu không trùng hoặc bắt được ngoại lệ.
+
+Thay it_size trong src/main_dh.cpp để đổi kích thước; mặc định 512 theo đề, miền hỗ trợ hiện tại là 3–512. Có thể dùng kích thước nhỏ để thử nhanh. Main đã được cài đặt nhưng chưa biên dịch/chạy xác minh trong môi trường Windows hiện tại.
